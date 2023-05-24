@@ -15,7 +15,11 @@ void led_effect_stop(void){
 
 void led_effect(int x){
 
+	/*//Stop the LEDs first */
 	led_effect_stop();
+
+/*	The PC Comes here when the MenuTaskCalls the led effect
+	so we start the timer to get the toggling effect desired by the user*/
 	xTimerStart(handle_software_timers[x-1],portMAX_DELAY);
 }
 

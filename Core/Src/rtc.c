@@ -53,6 +53,9 @@ void show_time_date(void)
 	format = (rtc_time.TimeFormat == RTC_HOURFORMAT12_AM) ? "AM" : "PM";
 
 	/* Display time Format : hh:mm:ss [AM/PM] */
+
+/*	sprintf effect is that it takes the characters you enter and stores it
+ *  as characters and put it in the pointer you pass as the 1st argument*/
 	sprintf((char*)showtime,"%s:\t%02d:%02d:%02d [%s]","\nCurrent Time&Date",rtc_time.Hours, rtc_time.Minutes, rtc_time.Seconds,format);
 	xQueueSend(Queue_Print,&time,portMAX_DELAY);
 
@@ -82,12 +85,12 @@ void rtc_configure_date(RTC_DateTypeDef *date)
 int validate_rtc_information(RTC_TimeTypeDef *time , RTC_DateTypeDef *date)
 {
 	if(time){
-		if( (time->Hours > 12) || (time->Minutes > 59) || (time->Seconds > 59) )
+		if( (time->Hours > 12) && (time->Minutes > 59) && (time->Seconds > 59) )
 			return 1;
 	}
 
 	if(date){
-		if( (date->Date > 31) || (date->WeekDay > 7) || (date->Year > 99) || (date->Month > 12) )
+		if( (date->Date > 31) && (date->WeekDay > 7) && (date->Year > 99) && (date->Month > 12) )
 			return 1;
 	}
 

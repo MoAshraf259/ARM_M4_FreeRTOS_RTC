@@ -323,6 +323,7 @@ static void MX_GPIO_Init(void)
 void led_timer_callback(TimerHandle_t xTimer){
 
 	uint32_t id;
+	/*Get which timer finished counting and wake up it`s own task*/
 	id=(uint32_t)pvTimerGetTimerID(xTimer);
 
 	switch (id){
@@ -347,25 +348,35 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	uint8_t dummy;
 
+	//Check if the queue is full
 	if(! xQueueIsQueueFullFromISR(Queue_Data))
 	{
 		/*Queue is not full */
 
+		//Then you can send the data stored in user_data from UART
 		xQueueSendFromISR(Queue_Data,(void*)&user_data,NULL);
 
-	}else{
+	}
+	else{
 		/*Queue is full */
 		if(user_data == '\n')
 		{
-			/*user_data = '\n' */
+			/*Checking if the last element received is just a NEW LINE Character*/
+			/*if it`s just a NEW LINE Character remove the last queue element and replace it*/
+
+			//Removing the last element of the queue
 			xQueueReceiveFromISR(Queue_Data,(void*)&dummy, NULL);
+
+			//Sending the \n to the queue last element
 			xQueueSendFromISR(Queue_Data,(void*)&user_data,NULL);
 		}
 	}
 
 
 	/* send notification to command handling task if user_data = '\n' */
+	/*if we already received the \n that means the user has finished sending his command "data"*/
 	if(user_data=='\n'){
+		/*	we notify the task responsible for handling the commands received whic is command task*/
 		xTaskNotifyFromISR(handle_command_task,0,eNoAction,NULL);
 	}
 
